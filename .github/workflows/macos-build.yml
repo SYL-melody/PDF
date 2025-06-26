@@ -20,10 +20,11 @@ jobs:
           python-version: '3.11'
 
       - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip setuptools wheel
+        run: >
+          pip install --upgrade pip &&
+          pip install "setuptools==68.2.2" &&
+          pip install "wheel==0.40.0" "typing-extensions==4.6.3" &&
           pip install py2app PyMuPDF Pillow imagehash
-
       - name: Build .app with py2app
         run: |
           rm -rf build dist
