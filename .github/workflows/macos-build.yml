@@ -1,17 +1,17 @@
-name: Build macOS App with py2app
+name: Build PDFDiffTool for macOS
 
 on:
+  workflow_dispatch:
   push:
     tags:
       - "v*"
-  workflow_dispatch:
 
 jobs:
-  build:
+  build-macos:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout source
+      - name: Checkout source code
         uses: actions/checkout@v3
 
       - name: Set up Python
@@ -19,32 +19,44 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Install dependencies
-        run: >
-          pip install --upgrade pip &&
-          pip install "setuptools==68.2.2" &&
-          pip install "wheel==0.40.0" "typing-extensions==4.6.3" &&
-          pip install py2app PyMuPDF Pillow imagehash
-      - name: Build .app with py2app
+      - name: Install Python dependencies (with safe versions)
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install "setuptools==68.2.2"
+          python -m pip install "wheel==0.40.0" "typing-extensions==4.6.3"
+          python -m pip install py2app PyMuPDF Pillow imagehash
+
+      - name: Clean previous builds
         run: |
           rm -rf build dist
+
+      - name: Build macOS .app with py2app
+        run: |
           python setup.py py2app
+
+      - name: Install latest create-dmg (from GitHub)
+        run: |
+          brew uninstall create-dmg || true
+          git clone https://github.com/create-dmg/create-dmg.git
+          sudo cp create-dmg/create-dmg /usr/local/bin/create-dmg
 
       - name: Create .dmg installer
         run: |
-          brew install create-dmg
           rm -f dist/PDFDiffTool.dmg
           create-dmg \
-            --dmg-title="PDFDiffTool Installer" \
-            --app-drop-link 600 185 \
+            --volname "PDFDiffTool Installer" \
+            --window-size 500 300 \
+            --icon-size 100 \
+            --app-drop-link 400 150 \
+            --icon "PDFDiffTool.app" 100 150 \
             dist/PDFDiffTool.dmg \
             dist/PDFDiffTool.app
 
-
-      - name: Upload built .app and .dmg
+      - name: Upload built .app and .dmg as artifact
         uses: actions/upload-artifact@v4
         with:
           name: PDFDiffTool-macOS
           path: |
             dist/PDFDiffTool.app
             dist/PDFDiffTool.dmg
+
