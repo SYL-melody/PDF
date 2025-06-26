@@ -33,11 +33,12 @@ jobs:
       - name: Create .dmg installer
         run: |
           brew install create-dmg
-          create-dmg dist/PDFDiffTool.app \
+          create-dmg \
             --overwrite \
             --dmg-title="PDFDiffTool Installer" \
             --app-drop-link 600 185 \
-            dist/PDFDiffTool.dmg
+            dist/PDFDiffTool.dmg \
+            dist/PDFDiffTool.app
 
       - name: Upload built .app and .dmg
         uses: actions/upload-artifact@v4
