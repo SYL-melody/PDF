@@ -38,7 +38,9 @@ jobs:
         run: |
           brew uninstall create-dmg || true
           git clone https://github.com/create-dmg/create-dmg.git
+          sudo mkdir -p /usr/local/share/create-dmg
           sudo cp create-dmg/create-dmg /usr/local/bin/create-dmg
+          sudo cp -r create-dmg/support /usr/local/share/create-dmg/
 
       - name: Create .dmg installer
         run: |
